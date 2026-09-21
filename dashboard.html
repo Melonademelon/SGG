@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Sistema de Gestión de Gastos - Panel Privado de Control y Registro Financiero">
-    <meta name="theme-color" content="#0b5ed7">
+    <meta name="description" content="Sistema de Gestión de Gastos - Panel Privado de Control Financiero">
     <title>SGG - Panel de Gastos</title>
     <link rel="stylesheet" href="css/style.css">
 </head>
@@ -13,8 +12,8 @@
         <div class="header-container">
             <h1 class="logo">SGG <span>| Gestor de Gastos</span></h1>
             <div class="header-actions">
-                <span id="user-display" class="user-badge" aria-live="polite" aria-label="Usuario actual"></span>
-                <button id="theme-toggle-btn" class="btn btn-secondary" type="button" aria-label="Cambiar a modo noche">
+                <span id="user-display" class="user-badge" aria-live="polite" aria-label="Usuario activo"></span>
+                <button id="theme-toggle-btn" class="btn btn-secondary" type="button" aria-label="Cambiar modo de color">
                     🌙 Modo Noche
                 </button>
                 <button id="logout-btn" class="btn btn-danger" type="button">Cerrar Sesión</button>
@@ -41,19 +40,19 @@
 
                     <div class="form-group">
                         <label for="monto">Monto ($):</label>
-                        <input type="number" id="monto" name="monto" step="0.01" min="0.01" placeholder="Ej: 1500.50" required aria-describedby="error-monto" aria-invalid="false">
+                        <input type="number" id="monto" name="monto" step="0.01" min="0.01" placeholder="Ej: 1500.50" required aria-describedby="error-monto">
                         <span class="error-message" id="error-monto" aria-live="polite"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="fecha">Fecha:</label>
-                        <input type="date" id="fecha" name="fecha" required aria-describedby="error-fecha" aria-invalid="false">
+                        <input type="date" id="fecha" name="fecha" required aria-describedby="error-fecha">
                         <span class="error-message" id="error-fecha" aria-live="polite"></span>
                     </div>
 
                     <div class="form-group">
                         <label for="categoria">Categoría:</label>
-                        <select id="categoria" name="categoria" required aria-describedby="error-categoria" aria-invalid="false">
+                        <select id="categoria" name="categoria" required aria-describedby="error-categoria">
                             <option value="" disabled selected>Seleccione una categoría</option>
                             <option value="Alimentación">Alimentación</option>
                             <option value="Transporte">Transporte</option>
@@ -65,7 +64,7 @@
 
                     <div class="form-group">
                         <label for="descripcion">Descripción:</label>
-                        <input type="text" id="descripcion" name="descripcion" placeholder="Ej: Compra de supermercado" required aria-describedby="error-descripcion" aria-invalid="false">
+                        <input type="text" id="descripcion" name="descripcion" placeholder="Ej: Compra de supermercado" required aria-describedby="error-descripcion">
                         <span class="error-message" id="error-descripcion" aria-live="polite"></span>
                     </div>
 
@@ -81,7 +80,7 @@
                 <h2 id="list-heading">Historial de Gastos</h2>
                 <div class="table-responsive">
                     <table class="gastos-table">
-                        <caption class="sr-only">Listado de gastos activos registrados por el usuario</caption>
+                        <caption class="sr-only">Listado de gastos registrados por el usuario activo</caption>
                         <thead>
                             <tr>
                                 <th scope="col">Fecha</th>
@@ -101,11 +100,11 @@
         </div>
     </main>
 
-    <!-- Modal de Confirmación para Baja Lógica (RF-08) WCAG Compliant -->
-    <div id="delete-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-describedby="modal-desc" aria-hidden="true">
-        <div class="modal-content card" tabindex="-1" id="modal-container">
+    <!-- Modal de Confirmación para Baja Lógica (RF-08) -->
+    <div id="delete-modal" class="modal-backdrop hidden" role="dialog" aria-modal="true" aria-labelledby="modal-title" aria-hidden="true">
+        <div class="modal-content card" tabindex="-1">
             <h3 id="modal-title">Confirmar Eliminación</h3>
-            <p id="modal-desc">¿Está seguro de que desea inactivar este registro? El monto dejará de contarse en el panel global.</p>
+            <p>¿Está seguro de que desea inactivar este registro? El monto dejará de contarse en el panel global.</p>
             <div class="modal-actions">
                 <button id="confirm-delete-btn" class="btn btn-danger" type="button">Eliminar</button>
                 <button id="cancel-delete-btn" class="btn btn-secondary" type="button">Cancelar</button>
@@ -113,6 +112,7 @@
         </div>
     </div>
 
+    <script src="js/main.js"></script>
     <script src="js/gastos.js"></script>
 </body>
 </html>
