@@ -1,45 +1,42 @@
-document.addEventListener('DOMContentLoaded', () => {
-    // Si ya existe sesión, redirigir al dashboard
-    if (SGG.obtenerSesion()) {
-        window.location.href = 'dashboard.html';
-        return;
-    }
+"use strict";
+let intentosFallidos = 0;
+const loginForm = document.getElementById("login-form");
 
-    const formLogin = document.getElementById('form-login');
-    const loginEmail = document.getElementById('login-email');
-    const loginPassword = document.getElementById('login-password');
-
-    formLogin.addEventListener('submit', (e) => {
+if(loginForm) {
+    loginForm.addEventListener("submit", (e) => {
         e.preventDefault();
-        SGG.limpiarErrores();
+        const btn = document.getElementById("btn-submit-login");
+        const identifier = document.getElementById("login-identifier").value.trim().toLowerCase();
+        const password = document.getElementById("login-password").value;
+        
+        const users = JSON.parse(localStorage.getItem("usuarios_sgg")) || [];
+        const user = users.find(u => u.username.toLowerCase() === identifier || u.email.toLowerCase() === identifier);
 
-        const emailVal = loginEmail.value.trim().toLowerCase();
-        const passVal = loginPassword.value;
-        let esValido = true;
-
-        if (!emailVal || !SGG.validarEmail(emailVal)) {
-            SGG.marcarError(loginEmail, 'error-login-email', 'Ingrese un correo electrónico válido.');
-            esValido = false;
-        }
-
-        if (!passVal) {
-            SGG.marcarError(loginPassword, 'error-login-password', 'Ingrese su contraseña.');
-            esValido = false;
-        }
-
-        if (!esValido) return;
-
-        const usuarios = SGG.obtenerUsuarios();
-        const usuarioEncontrado = usuarios.find(u => u.email === emailVal && u.password === passVal);
-
-        if (usuarioEncontrado) {
-            SGG.guardarSesion({
-                email: usuarioEncontrado.email,
-                nombre: usuarioEncontrado.nombre
-            });
-            window.location.href = 'dashboard.html';
+        if (user && user.password === password) {
+            intentosFallidos = 0;
+            showMessage("login-msg", `¡Bienvenido/a, ${user.nombre}! Redirigiendo al panel...`, "success");
+            setTimeout(() => { alert("🚀 Sesión iniciada con éxito. Conexión con Dashboard establecida."); }, 1500);
         } else {
-            document.getElementById('error-login-general').textContent = 'Credenciales incorrectas. Verifique sus datos.';
+            intentosFallidos++;
+            if (intentosFallidos >= 3) {
+                btn.disabled = true;
+                let timeLeft = 30;
+                showMessage("login-msg", `Bloqueo de seguridad por intentos fallidos. Espera ${timeLeft}s.`, "error");
+                
+                const interval = setInterval(() => {
+                    timeLeft--;
+                    showMessage("login-msg", `Bloqueo de seguridad por intentos fallidos. Espera ${timeLeft}s.`, "error");
+                    if (timeLeft <= 0) {
+                        clearInterval(interval);
+                        btn.disabled = false;
+                        intentosFallidos = 0;
+                        const msgDiv = document.getElementById("login-msg");
+                        if(msgDiv) msgDiv.classList.remove("show");
+                    }
+                }, 1000);
+            } else {
+                showMessage("login-msg", "Las credenciales introducidas son incorrectas.", "error");
+            }
         }
     });
-});
+}
