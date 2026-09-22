@@ -1,47 +1,63 @@
-let intentosFallidos = 0;
-const loginForm = document.getElementById("login-form");
+document.addEventListener("DOMContentLoaded", () => {
+    // Protección y Redirección
+    if (localStorage.getItem("usuario_activo") && window.location.pathname.includes("index.html")) {
+        window.location.href = "./dashboard.html";
+        return;
+    }
 
-if(loginForm) {
-    loginForm.addEventListener("submit", (e) => {
+    const loginSection = document.getElementById("login-section");
+    const registerSection = document.getElementById("register-section");
+    
+    // Toggle formularios
+    document.getElementById("link-register")?.addEventListener("click", (e) => {
         e.preventDefault();
-        const btn = document.getElementById("btn-submit-login");
-        const identifier = document.getElementById("login-identifier").value.trim().toLowerCase();
-        const password = document.getElementById("login-password").value;
-        
-        const users = JSON.parse(localStorage.getItem("usuarios_sgg")) || [];
-        const user = users.find(u => u.username.toLowerCase() === identifier || u.email.toLowerCase() === identifier);
+        loginSection.classList.add("hidden");
+        registerSection.classList.remove("hidden");
+    });
 
-        if (user && user.password === password) {
-            intentosFallidos = 0;
-            showMessage("login-msg", `¡Bienvenido/a, ${user.nombre}! Redirigiendo al panel...`, "success");
+    document.getElementById("link-login")?.addEventListener("click", (e) => {
+        e.preventDefault();
+        registerSection.classList.add("hidden");
+        loginSection.classList.remove("hidden");
+    });
+
+    // Toggle de visibilidad de contraseña
+    const setupPasswordToggle = (toggleId, inputId) => {
+        const toggleBtn = document.getElementById(toggleId);
+        const inputField = document.getElementById(inputId);
+        if (toggleBtn && inputField) {
+            const toggleAction = () => {
+                const isPassword = inputField.type === "password";
+                inputField.type = isPassword ? "text" : "password";
+                toggleBtn.classList.toggle("fa-eye");
+                toggleBtn.classList.toggle("fa-eye-slash");
+            };
+            toggleBtn.addEventListener("click", toggleAction);
+            toggleBtn.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") toggleAction(); });
+        }
+    };
+
+    setupPasswordToggle("toggle-login-pwd", "login-password");
+    setupPasswordToggle("toggle-reg-pwd", "reg-password");
+
+    // Lógica de Login
+    const loginForm = document.getElementById("login-form");
+    if (loginForm) {
+        loginForm.addEventListener("submit", (e) => {
+            e.preventDefault();
+            const identifier = document.getElementById("login-identifier").value.trim().toLowerCase();
+            const password = document.getElementById("login-password").value;
             
-            // Guardamos la sesión activa y redirigimos al Dashboard
-            setTimeout(() => { 
+            // Simulación DB local
+            const users = JSON.parse(localStorage.getItem("usuarios_sgg")) || [];
+            const user = users.find(u => u.username === identifier || u.email === identifier);
+
+            if (user && user.password === password) {
                 localStorage.setItem("usuario_activo", user.username);
                 window.location.href = "./dashboard.html"; 
-            }, 1500);
-            
-        } else {
-            intentosFallidos++;
-            if (intentosFallidos >= 3) {
-                btn.disabled = true;
-                let timeLeft = 30;
-                showMessage("login-msg", `Bloqueo de seguridad por intentos fallidos. Espera ${timeLeft}s.`, "error");
-                
-                const interval = setInterval(() => {
-                    timeLeft--;
-                    showMessage("login-msg", `Bloqueo de seguridad por intentos fallidos. Espera ${timeLeft}s.`, "error");
-                    if (timeLeft <= 0) {
-                        clearInterval(interval);
-                        btn.disabled = false;
-                        intentosFallidos = 0;
-                        const msgDiv = document.getElementById("login-msg");
-                        if(msgDiv) msgDiv.classList.remove("show");
-                    }
-                }, 1000);
             } else {
-                showMessage("login-msg", "Las credenciales introducidas son incorrectas.", "error");
+                alert("Credenciales incorrectas."); // Simplificado para garantizar el flujo. 
             }
-        }
-    });
-}
+        });
+    }
+});
