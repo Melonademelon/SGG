@@ -14,7 +14,13 @@ if(loginForm) {
         if (user && user.password === password) {
             intentosFallidos = 0;
             showMessage("login-msg", `¡Bienvenido/a, ${user.nombre}! Redirigiendo al panel...`, "success");
-            setTimeout(() => { alert("🚀 Sesión iniciada con éxito. Conexión con Dashboard establecida."); }, 1500);
+            
+            // Guardamos la sesión activa y redirigimos al Dashboard
+            setTimeout(() => { 
+                localStorage.setItem("usuario_activo", user.username);
+                window.location.href = "./dashboard.html"; 
+            }, 1500);
+            
         } else {
             intentosFallidos++;
             if (intentosFallidos >= 3) {
