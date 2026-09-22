@@ -3,25 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Página de bienvenida al sistema de gestión de gastos.">
-    <title>Bienvenida</title>
+    <meta name="description" content="Acceso al Sistema de Gestión de Gastos.">
+    <title>SGG - Iniciar Sesión</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
     <button id="theme-toggle" class="theme-btn" aria-label="Cambiar tema"><i class="fas fa-moon" aria-hidden="true"></i></button>
-    <div class="bg-shapes" aria-hidden="true"><div class="shape shape1"></div><div class="shape shape2"></div><div class="shape shape3"></div></div>
-
+    
     <main class="main-container">
-        <h2>¡Te damos la bienvenida!</h2>
-        <p>Descubre la forma más inteligente y segura de controlar tus gastos. ¿Qué deseas hacer hoy?</p>
-        
-        <div class="btn-group">
-            <a href="./login.html" class="btn-solid btn-enlace" aria-label="Ir a iniciar sesión">Iniciar Sesión</a>
-            <a href="./registro.html" class="btn-rainbow-border btn-enlace" aria-label="Ir a crear cuenta">Crear una Cuenta Nueva</a>
+        <!-- Formulario de Login -->
+        <div id="login-section">
+            <h2 style="text-align: center; margin-bottom: 20px;">Iniciar Sesión</h2>
+            <form id="login-form" novalidate>
+                <div class="form-group">
+                    <label for="login-identifier" class="visually-hidden">Usuario o Correo</label>
+                    <input type="text" id="login-identifier" placeholder="Usuario o Correo" required>
+                </div>
+                <div class="form-group">
+                    <label for="login-password" class="visually-hidden">Contraseña</label>
+                    <input type="password" id="login-password" placeholder="Contraseña" required>
+                </div>
+                <div id="login-msg" class="msg hidden" aria-live="polite"></div>
+                <button type="submit" id="btn-submit-login" class="btn-solid" style="width: 100%; margin-top: 10px;">Ingresar</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+                ¿No tienes cuenta? <a href="#" id="link-register" style="color: var(--primary-color);">Regístrate aquí</a>
+            </p>
+        </div>
+
+        <!-- Formulario de Registro -->
+        <div id="register-section" class="hidden">
+            <h2 style="text-align: center; margin-bottom: 20px;">Registro</h2>
+            <form id="register-form" novalidate>
+                <div class="form-group">
+                    <input type="text" id="reg-nombre" placeholder="Nombre" required>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="reg-username" placeholder="Nombre de Usuario" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" id="reg-email" placeholder="Correo Electrónico" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="reg-password" placeholder="Contraseña" required>
+                </div>
+                <div id="register-msg" class="msg hidden" aria-live="polite"></div>
+                <button type="submit" class="btn-solid" style="width: 100%; margin-top: 10px;">Registrarse</button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; font-size: 0.9rem;">
+                ¿Ya tienes cuenta? <a href="#" id="link-login" style="color: var(--primary-color);">Inicia Sesión</a>
+            </p>
         </div>
     </main>
 
     <script src="./js/main.js"></script>
+    <script src="./js/login.js"></script>
 </body>
 </html>
