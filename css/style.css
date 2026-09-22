@@ -60,3 +60,75 @@ body.dark-mode .password-requirements li.valid { color: #81c784; }
 .btn-rainbow-border { padding: 15px; border-radius: var(--border-radius); border: none; background: var(--bg-color); color: var(--text-color); font-weight: bold; cursor: pointer; position: relative; z-index: 1; transition: transform 0.2s; }
 .btn-rainbow-border::before { content: ""; position: absolute; inset: -2px; border-radius: calc(var(--border-radius) + 2px); background: var(--rainbow-gradient); z-index: -1; }
 .btn-rainbow-border:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+
+/* --- FORZADO DE CAJA DE CONTRASEÑA --- */
+.campo-seguro {
+    display: flex !important;
+    flex-direction: column !important;
+    width: 100% !important;
+    gap: 10px !important; /* Fuerza la separación entre el input y la lista */
+    margin-bottom: 25px !important;
+}
+
+.input-con-ojo {
+    position: relative !important;
+    display: block !important;
+    width: 100% !important;
+}
+
+/* El padding-right de 50px garantiza que el texto no toque el ojo */
+.input-con-ojo input {
+    width: 100% !important;
+    padding: 15px 50px 15px 15px !important; 
+    box-sizing: border-box !important;
+}
+
+/* Posicionamiento milimétrico del botón para que no estorbe */
+.btn-ojo {
+    position: absolute !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) !important;
+    background: none !important;
+    border: none !important;
+    color: var(--text-color) !important;
+    font-size: 1.2rem !important;
+    cursor: pointer !important;
+    padding: 5px !important;
+    z-index: 20 !important;
+}
+
+/* --- LISTA DE REQUISITOS SIN SOLAPAMIENTO --- */
+.requisitos-clave {
+    display: block !important;
+    background: rgba(0, 0, 0, 0.04) !important;
+    border-radius: 8px !important;
+    padding: 12px 15px !important;
+    list-style: none !important;
+    margin: 0 !important;
+}
+
+body.dark-mode .requisitos-clave {
+    background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.requisitos-clave li {
+    font-size: 0.8rem !important;
+    color: #666 !important;
+    margin-bottom: 5px !important;
+    display: flex !important;
+    align-items: center !important;
+    gap: 8px !important;
+}
+
+.requisitos-clave li i {
+    font-size: 0.4rem !important;
+}
+
+.requisitos-clave li.valid {
+    color: #2e7d32 !important;
+}
+
+body.dark-mode .requisitos-clave li.valid {
+    color: #81c784 !important;
+}
