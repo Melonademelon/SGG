@@ -3,25 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Página de bienvenida al sistema de gestión de gastos.">
-    <title>Bienvenida - SGG</title>
+    <meta name="description" content="Acceso al Sistema de Gestión de Gastos">
+    <title>SGG - Acceso</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-    <button id="theme-toggle" class="theme-btn" aria-label="Alternar tema claro u oscuro"><i class="fas fa-moon" aria-hidden="true"></i></button>
-    <div class="bg-shapes" aria-hidden="true"><div class="shape shape1"></div><div class="shape shape2"></div><div class="shape shape3"></div></div>
+    <div class="bg-shapes" aria-hidden="true">
+        <div class="shape shape1"></div>
+        <div class="shape shape2"></div>
+        <div class="shape shape3"></div>
+    </div>
 
-    <main class="main-container">
-        <h2>¡Te damos la bienvenida!</h2>
-        <p>Descubre la forma más inteligente y segura de controlar tus gastos. ¿Qué deseas hacer hoy?</p>
-        
-        <div class="btn-group">
-            <a href="./login.html" class="btn-solid btn-enlace" aria-label="Ir a iniciar sesión">Iniciar Sesión</a>
-            <a href="./registro.html" class="btn-rainbow-border btn-enlace" aria-label="Ir a crear cuenta">Crear una Cuenta Nueva</a>
+    <main class="main-container auth-container">
+        <div class="tabs" role="tablist">
+            <button id="tab-login" class="tab active" role="tab" aria-selected="true" tabindex="0">Iniciar Sesión</button>
+            <button id="tab-register" class="tab" role="tab" aria-selected="false" tabindex="-1">Registrarse</button>
         </div>
+
+        <!-- Formulario de Login -->
+        <form id="form-login" class="auth-form" novalidate>
+            <div class="form-group">
+                <input type="email" id="login-email" placeholder="Correo electrónico" required aria-describedby="error-login-email">
+                <span class="error-message msg error" id="error-login-email"></span>
+            </div>
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="login-password" placeholder="Contraseña" required aria-describedby="error-login-password">
+                    <button type="button" class="toggle-password btn-icon-small" data-target="login-password" aria-label="Mostrar contraseña">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <span class="error-message msg error" id="error-login-password"></span>
+            </div>
+            <span class="error-message msg error" id="error-login-general" style="text-align: center; margin-bottom: 15px;"></span>
+            <button type="submit" class="btn-rainbow-border" style="width: 100%;">Ingresar</button>
+        </form>
+
+        <!-- Formulario de Registro -->
+        <form id="form-register" class="auth-form hidden" aria-hidden="true" novalidate>
+            <div class="form-group">
+                <input type="text" id="reg-nombre" placeholder="Nombre completo" required aria-describedby="error-reg-nombre">
+                <span class="error-message msg error" id="error-reg-nombre"></span>
+            </div>
+            <div class="form-group">
+                <input type="email" id="reg-email" placeholder="Correo electrónico" required aria-describedby="error-reg-email">
+                <span class="error-message msg error" id="error-reg-email"></span>
+            </div>
+            <div class="form-group">
+                <div class="password-wrapper">
+                    <input type="password" id="reg-password" placeholder="Crear contraseña" required aria-describedby="password-rules error-reg-password">
+                    <button type="button" class="toggle-password btn-icon-small" data-target="reg-password" aria-label="Mostrar contraseña">
+                        <i class="fas fa-eye"></i>
+                    </button>
+                </div>
+                <span class="error-message msg error" id="error-reg-password"></span>
+                
+                <ul id="password-rules" class="password-requirements">
+                    <li id="rule-length"><i class="fas fa-circle"></i> Mínimo 8 caracteres</li>
+                    <li id="rule-upper"><i class="fas fa-circle"></i> Al menos 1 letra mayúscula</li>
+                    <li id="rule-lower"><i class="fas fa-circle"></i> Al menos 1 letra minúscula</li>
+                    <li id="rule-number"><i class="fas fa-circle"></i> Al menos 1 número</li>
+                    <li id="rule-special"><i class="fas fa-circle"></i> Al menos 1 carácter especial</li>
+                </ul>
+            </div>
+            <button type="submit" class="btn-rainbow-border" style="width: 100%;">Crear Cuenta</button>
+        </form>
     </main>
 
     <script src="./js/main.js"></script>
+    <script src="./js/auth.js"></script>
 </body>
 </html>
