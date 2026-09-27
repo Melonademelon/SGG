@@ -1,0 +1,83 @@
+document.addEventListener("DOMContentLoaded", () => {
+  // Control del Tema Oscuro/Claro
+  if (localStorage.getItem("theme_preference") === "dark") {
+    document.body.classList.add("dark-mode");
+    const icon = document.querySelector("#theme-toggle i");
+    if (icon) icon.classList.replace("fa-moon", "fa-sun");
+  }
+
+  const themeBtn = document.getElementById("theme-toggle");
+  if (themeBtn) {
+    themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark-mode");
+      const isDark = document.body.classList.contains("dark-mode");
+      localStorage.setItem("theme_preference", isDark ? "dark" : "light");
+      const icon = themeBtn.querySelector("i");
+      if (isDark) icon.classList.replace("fa-moon", "fa-sun");
+      else icon.classList.replace("fa-sun", "fa-moon");
+    });
+  }
+
+  // Control de visibilidad de contraseñas
+  document.querySelectorAll(".toggle-password").forEach((btn) => {
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      const targetId = btn.getAttribute("data-target");
+      const input = document.getElementById(targetId);
+      const icon = btn.querySelector("i");
+
+      if (input.type === "password") {
+        input.type = "text";
+        icon.classList.replace("fa-eye", "fa-eye-slash");
+        btn.setAttribute("aria-label", "Ocultar contraseña");
+      } else {
+        input.type = "password";
+        icon.classList.replace("fa-eye-slash", "fa-eye");
+        btn.setAttribute("aria-label", "Mostrar contraseña");
+      }
+    });
+  });
+});
+
+function showMessage(elementId, text, type) {
+  const msgEl = document.getElementById(elementId);
+  if (msgEl) {
+    msgEl.textContent = text;
+    msgEl.className = `msg show ${type}`;
+  }
+}
+
+function validatePasswordRules(inputId, btnId, prefix) {
+  const val = document.getElementById(inputId).value;
+  const checks = {
+    len: val.length >= 8,
+    upper: /[A-Z]/.test(val),
+    lower: /[a-z]/.test(val),
+    num: /[0-9]/.test(val),
+    spec: /[!@#$%^&*(),.?":{}|<>]/.test(val)
+  };
+
+  const updateIcon = (id, isValid) => {
+    const li = document.getElementById(prefix + id);
+    if (!li) return;
+    const icon = li.querySelector("i");
+    if (isValid) {
+      li.className = "requirement valid";
+      icon.className = "fas fa-check";
+    } else {
+      li.className = "requirement invalid";
+      icon.className = "fas fa-times";
+    }
+  };
+
+  updateIcon("len", checks.len);
+  updateIcon("upper", checks.upper);
+  updateIcon("lower", checks.lower);
+  updateIcon("num", checks.num);
+  updateIcon("spec", checks.spec);
+
+  const isValid = Object.values(checks).every(Boolean);
+  const btn = document.getElementById(btnId);
+  if (btn) btn.disabled = !isValid;
+  return isValid;
+}
