@@ -1,24 +1,23 @@
 window.AppDB = {
-  db: null,
+    db: null,
 
-  initDB: async function () {
-    if (this.db) return;
-    const SQL = await initSqlJs({
-      locateFile: (file) =>
-        `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
-    });
-    const savedData = localStorage.getItem("sqlite_sgg_db");
+    initDB: async function() {
+        if (this.db) return;
+        const SQL = await initSqlJs({
+            locateFile: file => `https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/${file}`
+        });
+        const savedData = localStorage.getItem("sqlite_sgg_db");
 
-    if (savedData) {
-      const binaryString = window.atob(savedData);
-      const bytes = new Uint8Array(binaryString.length);
-      for (let i = 0; i < binaryString.length; i++) {
-        bytes[i] = binaryString.charCodeAt(i);
-      }
-      this.db = new SQL.Database(bytes);
-    } else {
-      this.db = new SQL.Database();
-      this.db.run(`
+        if (savedData) {
+            const binaryString = window.atob(savedData);
+            const bytes = new Uint8Array(binaryString.length);
+            for (let i = 0; i < binaryString.length; i++) {
+                bytes[i] = binaryString.charCodeAt(i);
+            }
+            this.db = new SQL.Database(bytes);
+        } else {
+            this.db = new SQL.Database();
+            this.db.run(`
                 CREATE TABLE usuarios (
                     id_usuario INTEGER PRIMARY KEY AUTOINCREMENT,
                     username TEXT UNIQUE NOT NULL,
@@ -37,6 +36,7 @@ window.AppDB = {
                     descripcion TEXT NOT NULL,
                     monto REAL NOT NULL CHECK (monto > 0), 
                     categoria TEXT NOT NULL,
+                    tipo TEXT NOT NULL DEFAULT 'Egreso',
                     fecha_gasto DATE NOT NULL,
                     estado_activo INTEGER DEFAULT 1, 
                     fecha_creacion DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -46,34 +46,34 @@ window.AppDB = {
                 CREATE INDEX idx_estado ON gastos(estado_activo);
             `);
 
-      // Usuarios iniciales de prueba
-      this.db.run(`
+            // Usuarios iniciales de prueba (Melon y Coco)
+            this.db.run(`
                 INSERT INTO usuarios (nombre, apellido, dob, email, username, password_hash, question, answer)
                 VALUES 
                 ('Melon', 'Test', '1990-01-01', 'melon@gmail.com', 'melon', 'Hola1234@', 'mascota', 'poroto'),
                 ('Coco', 'Test', '1990-01-01', 'coco@gmail.com', 'coco', 'Chau1234@', 'mascota', 'masha');
             `);
-      this.save();
-    }
-  },
+            this.save();
+        }
+    },
 
-  save: function () {
-    const data = this.db.export();
-    let binaryString = "";
-    for (let i = 0; i < data.length; i++) {
-      binaryString += String.fromCharCode(data[i]);
-    }
-    localStorage.setItem("sqlite_sgg_db", window.btoa(binaryString));
-  },
+    save: function() {
+        const data = this.db.export();
+        let binaryString = '';
+        for (let i = 0; i < data.length; i++) {
+            binaryString += String.fromCharCode(data[i]);
+        }
+        localStorage.setItem("sqlite_sgg_db", window.btoa(binaryString));
+    },
 
-  query: function (sql, params = []) {
-    const stmt = this.db.prepare(sql);
-    stmt.bind(params);
-    const result = [];
-    while (stmt.step()) {
-      result.push(stmt.getAsObject());
+    query: function(sql, params = []) {
+        const stmt = this.db.prepare(sql);
+        stmt.bind(params);
+        const result = [];
+        while (stmt.step()) {
+            result.push(stmt.getAsObject());
+        }
+        stmt.free();
+        return result;
     }
-    stmt.free();
-    return result;
-  }
 };
