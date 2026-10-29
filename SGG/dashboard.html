@@ -1,0 +1,119 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Panel de gestión de gastos del usuario."
+    />
+    <title>Mi Panel Financiero</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+    <link rel="stylesheet" href="./css/style.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="./js/db.js"></script>
+  </head>
+  <body>
+    <button id="theme-toggle" class="theme-btn" aria-label="Cambiar tema">
+      <i class="fas fa-moon" aria-hidden="true"></i>
+    </button>
+    <div class="bg-shapes" aria-hidden="true">
+      <div class="shape shape1"></div>
+      <div class="shape shape2"></div>
+      <div class="shape shape3"></div>
+    </div>
+
+    <main class="main-container dashboard-card">
+      <header class="dashboard-header">
+        <div>
+          <h2 style="margin-bottom: 0" id="user-greeting">Hola, Usuario</h2>
+          <p style="margin-bottom: 0">
+            Controla tu dinero en tiempo real con SQLite.
+          </p>
+        </div>
+        <button
+          id="btn-logout"
+          class="btn-solid btn-danger"
+          style="width: auto"
+        >
+          Cerrar Sesión
+        </button>
+      </header>
+
+      <div class="dashboard-grid">
+        <!-- Formulario de Registro / Edición -->
+        <form id="form-gastos">
+          <h3 style="margin-bottom: 15px" id="form-title">Registrar Gasto</h3>
+          <input type="hidden" id="gasto-id" />
+
+          <div class="form-group">
+            <input
+              type="text"
+              id="gasto-desc"
+              placeholder="Descripción (ej. Supermercado)"
+              required
+            />
+          </div>
+          <div class="form-group">
+            <input
+              type="number"
+              id="gasto-monto"
+              placeholder="Monto ($)"
+              required
+              min="0.01"
+              step="0.01"
+            />
+          </div>
+          <div class="form-group">
+            <select id="gasto-cat" required>
+              <option value="" disabled selected>Selecciona Categoría</option>
+              <option value="Alimentación">Alimentación</option>
+              <option value="Transporte">Transporte</option>
+              <option value="Servicios">Servicios</option>
+              <option value="Entretenimiento">Entretenimiento</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <input type="date" id="gasto-fecha" required />
+          </div>
+
+          <button type="submit" id="btn-save-gasto" class="btn-rainbow-border">
+            Guardar Gasto
+          </button>
+          <button
+            type="button"
+            id="btn-cancel-edit"
+            class="btn-solid hidden"
+            style="margin-top: 10px"
+          >
+            Cancelar Edición
+          </button>
+        </form>
+
+        <!-- Listado y Sumatoria -->
+        <section>
+          <div
+            style="
+              display: flex;
+              justify-content: space-between;
+              align-items: center;
+              margin-bottom: 15px;
+            "
+          >
+            <h3>Historial</h3>
+            <h3 id="total-gastos" style="color: #2e7d32; font-size: 1.8rem">
+              $0.00
+            </h3>
+          </div>
+          <div id="lista-gastos"></div>
+        </section>
+      </div>
+    </main>
+
+    <script src="./js/main.js"></script>
+    <script src="./js/gastos.js"></script>
+  </body>
+</html>
