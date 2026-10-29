@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panel de control financiero personal SGG.">
+    <title>SGG - Dashboard Financiero</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="./css/style.css">
+    
+    <!-- Librerías Externas requeridas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
+    <script src="./js/db.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <button id="theme-toggle" class="theme-btn" aria-label="Cambiar tema">
+        <i class="fas fa-moon" aria-hidden="true"></i>
+    </button>
+
+    <main class="main-container dashboard-card">
+        <header class="dashboard-header">
+            <div>
+                <h2 id="user-greeting">Mi Billetera</h2>
+                <p style="margin-bottom: 0;">Gestión de ingresos, egresos y comprobantes.</p>
+            </div>
+            <div>
+                <button id="btn-sync-cloud" class="btn-solid btn-rainbow-border" style="width: auto; padding: 10px 14px; margin-right: 8px;">
+                    <i class="fas fa-cloud-upload-alt"></i> Respaldar
+                </button>
+                <button id="btn-logout" class="btn-solid btn-danger" style="width: auto; padding: 10px 18px;">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
+        </header>
+
+        <div class="dashboard-grid">
+            <!-- Formulario de Entrada -->
+            <section>
+                <form id="form-gastos" style="background: var(--input-bg); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
+                    <h3 id="form-title" style="margin-bottom: 16px; font-size: 1.1rem; font-family: var(--font-heading);">Registrar Movimiento</h3>
+                    <input type="hidden" id="gasto-id">
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gasto-tipo">Tipo</label>
+                            <select id="gasto-tipo" required>
+                                <option value="egreso" selected>Egreso (-)</option>
+                                <option value="ingreso">Ingreso (+)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gasto-monto">Monto ($)</label>
+                            <input type="number" id="gasto-monto" placeholder="0.00" min="0.01" step="0.01" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="gasto-desc">Descripción</label>
+                        <input type="text" id="gasto-desc" placeholder="Ej. Sueldo, Alquiler, Supermercado" required>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="gasto-cat">Categoría</label>
+                            <select id="gasto-cat" required></select>
+                        </div>
+                        <div class="form-group">
+                            <label for="gasto-fecha">Fecha</label>
+                            <input type="date" id="gasto-fecha" required>
+                        </div>
+                    </div>
+
+                    <!-- Input para Comprobante Adjunto -->
+                    <div class="form-group">
+                        <label for="gasto-comprobante">Comprobante (Opcional)</label>
+                        <input type="file" id="gasto-comprobante" accept="image/*">
+                    </div>
+
+                    <div style="display: flex; gap: 10px; margin-top: 15px;">
+                        <button type="submit" id="btn-save-gasto" class="btn-solid">Guardar Movimiento</button>
+                        <button type="button" id="btn-cancel-edit" class="btn-rainbow-border hidden">Cancelar</button>
+                    </div>
+                </form>
+
+                <!-- Panel de Gráficos -->
+                <div class="charts-wrapper">
+                    <div class="chart-card">
+                        <h4>Ingresos vs Egresos (Global)</h4>
+                        <div class="chart-container">
+                            <canvas id="chartBarras"></canvas>
+                        </div>
+                    </div>
+                    <div class="chart-card">
+                        <h4>Distribución de Egresos</h4>
+                        <div class="chart-container">
+                            <canvas id="chartDona"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Resumen KPIs e Historial -->
+            <section>
+                <div class="kpi-container">
+                    <div class="kpi-card">
+                        <div class="kpi-title">Ingresos</div>
+                        <div id="total-ingresos" class="kpi-value" style="color: var(--green-accent);">$0.00</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Egresos</div>
+                        <div id="total-egresos" class="kpi-value" style="color: var(--pink-accent);">$0.00</div>
+                    </div>
+                    <div class="kpi-card">
+                        <div class="kpi-title">Balance Neto</div>
+                        <div id="balance-total" class="kpi-value" style="color: var(--blue-accent);">$0.00</div>
+                    </div>
+                </div>
+
+                <h3 style="font-size: 1.1rem; font-family: var(--font-heading); margin-bottom: 12px;">Historial de Movimientos</h3>
+                <div id="lista-gastos" style="max-height: 500px; overflow-y: auto; padding-right: 4px;"></div>
+            </section>
+        </div>
+    </main>
+
+    <script src="./js/main.js"></script>
+    <script src="./js/gastos.js"></script>
+</body>
+</html>
