@@ -21,13 +21,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     const totalEgresosEl = document.getElementById("total-egresos");
     const balanceTotalEl = document.getElementById("balance-total");
 
-    let chartSemanalInstance = null;
-    let chartMensualInstance = null;
+    let chartBarrasInstance = null;
+    let chartDonaInstance = null;
 
-    // Categorías dinámicas según el tipo elegido
+    // Categorías según tipo
     const categoriasPorTipo = {
-        Egreso: ["Alimentación", "Transporte", "Servicios", "Entretenimiento", "Otros"],
-        Ingreso: ["Sueldo / Salario", "Freelance / Ventas", "Inversiones", "Regalos / Premios", "Otros Ingresos"]
+        egreso: ["Alimentación", "Transporte", "Servicios", "Entretenimiento", "Otros"],
+        ingreso: ["Sueldo / Salario", "Freelance", "Inversiones", "Regalos", "Otros"]
     };
 
     const actualizarCategoriasSelect = () => {
@@ -44,110 +44,117 @@ document.addEventListener("DOMContentLoaded", async () => {
     tipoSelect.addEventListener("change", actualizarCategoriasSelect);
     actualizarCategoriasSelect();
 
-    // 1. Gráfico Semanal (Barras: Ingresos vs Egresos por día)
-    const actualizarGraficoSemanal = (misMovimientos) => {
-        const ctx = document.getElementById("chartSemanal").getContext("2d");
-        const diasSemana = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
-        const ingresosPorDia = [0, 0, 0, 0, 0, 0, 0];
-        const egresosPorDia = [0, 0, 0, 0, 0, 0, 0];
+    // --- CONSUMO ASINCRÓNICO DE API REST EXTERNA PARA IMÁGENES ---
+    const subirComprobanteAPI = async (fileInput) => {
+        if (!fileInput.files || fileInput.files.length === 0) return null;
 
-        const hoy = new Date();
-        const hace7Dias = new Date();
-        hace7Dias.setDate(hoy.getDate() - 6);
+        const apiKey = "d3b45a0e9803bf5ff8137397b9ec59b5"; // Key pública/demostración
+        const formData = new FormData();
+        formData.append("image", fileInput.files[0]);
 
-        misMovimientos.forEach(m => {
-            const fecha = new Date(m.fecha_gasto + "T00:00:00");
-            if (fecha >= hace7Dias && fecha <= hoy) {
-                const diaIndice = fecha.getDay();
-                if (m.tipo === "Ingreso") ingresosPorDia[diaIndice] += m.monto;
-                else egresosPorDia[diaIndice] += m.monto;
+        try {
+            const response = await fetch(`https://api.imgbb.com/1/upload?key=${apiKey}`, {
+                method: "POST",
+                body: formData
+            });
+
+            const result = await response.json();
+            if (result.success) {
+                return result.data.url; // URL pública entregada por la API
             }
-        });
-
-        if (chartSemanalInstance) chartSemanalInstance.destroy();
-
-        const isDarkMode = document.body.classList.contains("dark-mode");
-        const textColor = isDarkMode ? "#f5f2ec" : "#2d2a26";
-
-        chartSemanalInstance = new Chart(ctx, {
-            type: "bar",
-            data: {
-                labels: diasSemana,
-                datasets: [
-                    { label: "Ingresos", data: ingresosPorDia, backgroundColor: "#6b9080", borderRadius: 4 },
-                    { label: "Egresos", data: egresosPorDia, backgroundColor: "#d8708a", borderRadius: 4 }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: { labels: { color: textColor, font: { family: "Plus Jakarta Sans", size: 10 }, boxWidth: 10 } }
-                },
-                scales: {
-                    x: { ticks: { color: textColor, font: { family: "Plus Jakarta Sans", size: 9 } } },
-                    y: { ticks: { color: textColor, font: { family: "Plus Jakarta Sans", size: 9 } } }
-                }
-            }
-        });
+            throw new Error("Respuesta no válida de la API de Imágenes");
+        } catch (error) {
+            console.warn("Resiliencia API: Error al subir imagen. Se registrará en NULL:", error);
+            alert("No se pudo cargar la imagen en el servidor remoto. El movimiento se guardará sin comprobante.");
+            return null; // Retorna NULL en caso de fallo garantizando resiliencia
+        }
     };
 
-    // 2. Gráfico Mensual (Dona: Ingresos vs Egresos Totales del Mes)
-    const actualizarGraficoMensual = (misMovimientos) => {
-        const ctx = document.getElementById("chartMensual").getContext("2d");
-        const hoy = new Date();
-        const mesActual = hoy.getMonth();
-        const anioActual = hoy.getFullYear();
+    // --- GRÁFICO 1: COMPARATIVA DE BARRAS (SUM VIA GROUP BY SQL) ---
+    const renderizarGraficoBarras = () => {
+        const ctx = document.getElementById("chartBarras").getContext("2d");
 
-        let totalIngresosMes = 0;
-        let totalEgresosMes = 0;
+        // Consulta de agregación SQL para métricas
+        const res = window.AppDB.query(`
+            SELECT tipo, SUM(monto) as total 
+            FROM gastos 
+            WHERE id_usuario = ? AND activo = 1 
+            GROUP BY tipo
+        `, [currentUserId]);
 
-        misMovimientos.forEach(m => {
-            const fecha = new Date(m.fecha_gasto + "T00:00:00");
-            if (fecha.getMonth() === mesActual && fecha.getFullYear() === anioActual) {
-                if (m.tipo === "Ingreso") totalIngresosMes += m.monto;
-                else totalEgresosMes += m.monto;
-            }
+        let totalIngreso = 0;
+        let totalEgreso = 0;
+
+        res.forEach(row => {
+            if (row.tipo === "ingreso") totalIngreso = row.total;
+            if (row.tipo === "egreso") totalEgreso = row.total;
         });
 
-        if (chartMensualInstance) chartMensualInstance.destroy();
+        if (chartBarrasInstance) chartBarrasInstance.destroy();
 
-        if (totalIngresosMes === 0 && totalEgresosMes === 0) return;
-
-        const isDarkMode = document.body.classList.contains("dark-mode");
-        const textColor = isDarkMode ? "#f5f2ec" : "#2d2a26";
-
-        chartMensualInstance = new Chart(ctx, {
-            type: "doughnut",
+        chartBarrasInstance = new Chart(ctx, {
+            type: "bar",
             data: {
                 labels: ["Ingresos", "Egresos"],
                 datasets: [{
-                    data: [totalIngresosMes, totalEgresosMes],
+                    label: "Monto Acumulado ($)",
+                    data: [totalIngreso, totalEgreso],
                     backgroundColor: ["#6b9080", "#d8708a"],
-                    borderWidth: 2,
-                    borderColor: isDarkMode ? "#211e1b" : "#ffffff"
+                    borderRadius: 6
                 }]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: "bottom",
-                        labels: { color: textColor, font: { family: "Plus Jakarta Sans", size: 10 }, boxWidth: 12 }
-                    }
-                },
-                cutout: "68%"
+                plugins: { legend: { display: false } }
             }
         });
     };
 
-    // Renderizado general de lista y KPIs
+    // --- GRÁFICO 2: DONA POR CATEGORÍAS DE EGRESO (SQL GROUP BY) ---
+    const renderizarGraficoDona = () => {
+        const ctx = document.getElementById("chartDona").getContext("2d");
+
+        // Consulta agregada por categoría
+        const res = window.AppDB.query(`
+            SELECT categoria, SUM(monto) as total 
+            FROM gastos 
+            WHERE id_usuario = ? AND tipo = 'egreso' AND activo = 1 
+            GROUP BY categoria
+        `, [currentUserId]);
+
+        const labels = res.map(r => r.categoria);
+        const dataValues = res.map(r => r.total);
+
+        if (chartDonaInstance) chartDonaInstance.destroy();
+
+        if (labels.length === 0) return;
+
+        chartDonaInstance = new Chart(ctx, {
+            type: "doughnut",
+            data: {
+                labels: labels,
+                datasets: [{
+                    data: dataValues,
+                    backgroundColor: ["#d8708a", "#6b9080", "#7ba4b5", "#e0a96d", "#9b829c"]
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: { legend: { position: "bottom" } },
+                cutout: "65%"
+            }
+        });
+    };
+
+    // --- RENDERIZADO DE MOVIMIENTOS Y BALANCES ---
     const renderizarGastos = () => {
         listaGastos.innerHTML = "";
         
+        // Obtener solo registros activos (Borrado Lógico)
         const misMovimientos = window.AppDB.query(
-            `SELECT * FROM gastos WHERE id_usuario = ? AND estado_activo = 1 ORDER BY fecha_gasto DESC`,
+            `SELECT * FROM gastos WHERE id_usuario = ? AND activo = 1 ORDER BY fecha_gasto DESC`,
             [currentUserId]
         );
         
@@ -155,18 +162,18 @@ document.addEventListener("DOMContentLoaded", async () => {
         let totalEgresos = 0;
 
         if (misMovimientos.length === 0) {
-            listaGastos.innerHTML = `<p style="text-align: center; color: var(--text-secondary); margin-top: 30px;">Sin movimientos registrados.</p>`;
+            listaGastos.innerHTML = `<p style="text-align: center; color: var(--text-secondary); margin-top: 30px;">Sin movimientos activos.</p>`;
             totalIngresosEl.textContent = `$0.00`;
             totalEgresosEl.textContent = `$0.00`;
             balanceTotalEl.textContent = `$0.00`;
-            actualizarGraficoSemanal([]);
-            actualizarGraficoMensual([]);
+            renderizarGraficoBarras();
+            renderizarGraficoDona();
             return;
         }
 
         const fragment = document.createDocumentFragment();
         misMovimientos.forEach(mov => {
-            const esIngreso = mov.tipo === "Ingreso";
+            const esIngreso = mov.tipo === "ingreso";
             if (esIngreso) totalIngresos += mov.monto;
             else totalEgresos += mov.monto;
 
@@ -174,10 +181,11 @@ document.addEventListener("DOMContentLoaded", async () => {
             item.className = `gasto-card-item ${esIngreso ? 'ingreso-item' : 'egreso-item'}`;
             item.innerHTML = `
                 <div>
-                    <strong style="font-size: 0.95rem; color: var(--text-primary);">${mov.descripcion}</strong>
+                    <strong style="font-size: 0.95rem;">${mov.descripcion}</strong>
                     <span class="badge-tipo ${esIngreso ? 'ingreso' : 'egreso'}">${mov.tipo}</span>
                     <div style="font-size: 0.8rem; color: var(--text-secondary); margin-top: 2px;">
                         <span>${mov.categoria}</span> • <span>${mov.fecha_gasto}</span>
+                        ${mov.url_comprobante ? ` • <a href="${mov.url_comprobante}" target="_blank" style="color: var(--blue-accent);"><i class="fas fa-paperclip"></i> Comprobante</a>` : ''}
                     </div>
                 </div>
                 <div style="display: flex; align-items: center; gap: 12px;">
@@ -185,8 +193,8 @@ document.addEventListener("DOMContentLoaded", async () => {
                         ${esIngreso ? '+' : '-'}$${mov.monto.toFixed(2)}
                     </span>
                     <div class="gasto-actions">
-                        <button class="btn-icon btn-edit" data-id="${mov.id_gasto}" aria-label="Editar"><i class="fas fa-edit"></i></button>
-                        <button class="btn-icon delete btn-delete" data-id="${mov.id_gasto}" aria-label="Eliminar"><i class="fas fa-trash-alt"></i></button>
+                        <button class="btn-icon btn-edit" data-id="${mov.id_gasto}"><i class="fas fa-edit"></i></button>
+                        <button class="btn-icon delete btn-delete" data-id="${mov.id_gasto}"><i class="fas fa-trash-alt"></i></button>
                     </div>
                 </div>
             `;
@@ -199,14 +207,13 @@ document.addEventListener("DOMContentLoaded", async () => {
         totalIngresosEl.textContent = `$${totalIngresos.toFixed(2)}`;
         totalEgresosEl.textContent = `$${totalEgresos.toFixed(2)}`;
         balanceTotalEl.textContent = `$${balance.toFixed(2)}`;
-        balanceTotalEl.style.color = balance < 0 ? "var(--rose-danger)" : "var(--blue-accent)";
 
-        actualizarGraficoSemanal(misMovimientos);
-        actualizarGraficoMensual(misMovimientos);
+        renderizarGraficoBarras();
+        renderizarGraficoDona();
     };
 
-    // Guardar / Editar movimiento
-    formGastos.addEventListener("submit", (e) => {
+    // --- REGISTRAR O EDITAR MOVIMIENTO ---
+    formGastos.addEventListener("submit", async (e) => {
         e.preventDefault();
         const idGasto = document.getElementById("gasto-id").value;
         const tipo = tipoSelect.value;
@@ -214,38 +221,52 @@ document.addEventListener("DOMContentLoaded", async () => {
         const monto = parseFloat(document.getElementById("gasto-monto").value);
         const cat = catSelect.value;
         const fecha = document.getElementById("gasto-fecha").value;
+        const fileInput = document.getElementById("gasto-comprobante");
 
         if (monto <= 0 || isNaN(monto)) return;
 
+        // Cargar imagen mediante API externa si existe
+        let urlComprobante = null;
+        if (fileInput && fileInput.files.length > 0) {
+            urlComprobante = await subirComprobanteAPI(fileInput);
+        }
+
         if (idGasto) {
             window.AppDB.db.run(
-                `UPDATE gastos SET tipo = ?, descripcion = ?, monto = ?, categoria = ?, fecha_gasto = ? WHERE id_gasto = ? AND id_usuario = ?`,
-                [tipo, desc, monto, cat, fecha, idGasto, currentUserId]
+                `UPDATE gastos SET tipo = ?, descripcion = ?, monto = ?, categoria = ?, fecha_gasto = ? ${urlComprobante ? ', url_comprobante = ?' : ''} WHERE id_gasto = ? AND id_usuario = ?`,
+                urlComprobante ? [tipo, desc, monto, cat, fecha, urlComprobante, idGasto, currentUserId] : [tipo, desc, monto, cat, fecha, idGasto, currentUserId]
             );
         } else {
             window.AppDB.db.run(
-                `INSERT INTO gastos (id_usuario, tipo, descripcion, monto, categoria, fecha_gasto) VALUES (?, ?, ?, ?, ?, ?)`,
-                [currentUserId, tipo, desc, monto, cat, fecha]
+                `INSERT INTO gastos (id_usuario, tipo, descripcion, monto, categoria, fecha_gasto, url_comprobante) VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                [currentUserId, tipo, desc, monto, cat, fecha, urlComprobante]
             );
         }
         
-        window.AppDB.save();
+        await window.AppDB.save(); // Persistir en OPFS nativo
         renderizarGastos();
         salirModoEdicion();
     });
 
-    // Editar / Soft Delete
-    listaGastos.addEventListener("click", (e) => {
-        const btnEdit = e.target.closest(".btn-edit");
+    // --- BORRADO LÓGICO (UPDATE activo = 0) ---
+    listaGastos.addEventListener("click", async (e) => {
         const btnDel = e.target.closest(".btn-delete");
+        const btnEdit = e.target.closest(".btn-edit");
+
+        if (btnDel) {
+            if (confirm("¿Deseas eliminar este registro del historial?")) {
+                window.AppDB.db.run(`UPDATE gastos SET activo = 0 WHERE id_gasto = ? AND id_usuario = ?`, [btnDel.dataset.id, currentUserId]);
+                await window.AppDB.save();
+                renderizarGastos();
+            }
+        }
 
         if (btnEdit) {
-            const gastoId = btnEdit.dataset.id;
-            const res = window.AppDB.query(`SELECT * FROM gastos WHERE id_gasto = ?`, [gastoId]);
+            const res = window.AppDB.query(`SELECT * FROM gastos WHERE id_gasto = ?`, [btnEdit.dataset.id]);
             if (res.length > 0) {
                 const g = res[0];
                 document.getElementById("gasto-id").value = g.id_gasto;
-                tipoSelect.value = g.tipo || "Egreso";
+                tipoSelect.value = g.tipo;
                 actualizarCategoriasSelect();
                 document.getElementById("gasto-desc").value = g.descripcion;
                 document.getElementById("gasto-monto").value = g.monto;
@@ -253,14 +274,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 document.getElementById("gasto-fecha").value = g.fecha_gasto;
                 document.getElementById("form-title").textContent = "Editar Movimiento";
                 document.getElementById("btn-cancel-edit").classList.remove("hidden");
-            }
-        }
-
-        if (btnDel) {
-            if(confirm("¿Inactivar este registro del historial?")) {
-                window.AppDB.db.run(`UPDATE gastos SET estado_activo = 0 WHERE id_gasto = ? AND id_usuario = ?`, [btnDel.dataset.id, currentUserId]);
-                window.AppDB.save();
-                renderizarGastos();
             }
         }
     });
