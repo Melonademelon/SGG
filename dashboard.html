@@ -7,6 +7,8 @@
     <title>SGG - Dashboard Financiero</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="./css/style.css">
+    
+    <!-- Librerías Externas requeridas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/sql.js/1.8.0/sql-wasm.js"></script>
     <script src="./js/db.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -20,14 +22,20 @@
         <header class="dashboard-header">
             <div>
                 <h2 id="user-greeting">Mi Billetera</h2>
-                <p style="margin-bottom: 0;">Gestión integral de ingresos y egresos.</p>
+                <p style="margin-bottom: 0;">Gestión de ingresos, egresos y comprobantes.</p>
             </div>
-            <button id="btn-logout" class="btn-solid btn-danger" style="width: auto; padding: 10px 18px;">
-                <i class="fas fa-sign-out-alt" style="margin-right: 8px;"></i> Cerrar Sesión
-            </button>
+            <div>
+                <button id="btn-sync-cloud" class="btn-solid btn-rainbow-border" style="width: auto; padding: 10px 14px; margin-right: 8px;">
+                    <i class="fas fa-cloud-upload-alt"></i> Respaldar
+                </button>
+                <button id="btn-logout" class="btn-solid btn-danger" style="width: auto; padding: 10px 18px;">
+                    <i class="fas fa-sign-out-alt"></i> Salir
+                </button>
+            </div>
         </header>
 
         <div class="dashboard-grid">
+            <!-- Formulario de Entrada -->
             <section>
                 <form id="form-gastos" style="background: var(--input-bg); padding: 24px; border-radius: var(--radius-md); border: 1px solid var(--card-border);">
                     <h3 id="form-title" style="margin-bottom: 16px; font-size: 1.1rem; font-family: var(--font-heading);">Registrar Movimiento</h3>
@@ -37,8 +45,8 @@
                         <div class="form-group">
                             <label for="gasto-tipo">Tipo</label>
                             <select id="gasto-tipo" required>
-                                <option value="Egreso" selected>Egreso (-)</option>
-                                <option value="Ingreso">Ingreso (+)</option>
+                                <option value="egreso" selected>Egreso (-)</option>
+                                <option value="ingreso">Ingreso (+)</option>
                             </select>
                         </div>
                         <div class="form-group">
@@ -49,19 +57,24 @@
 
                     <div class="form-group">
                         <label for="gasto-desc">Descripción</label>
-                        <input type="text" id="gasto-desc" placeholder="Ej. Sueldo, Supermercado, Freelance" required>
+                        <input type="text" id="gasto-desc" placeholder="Ej. Sueldo, Alquiler, Supermercado" required>
                     </div>
 
                     <div class="form-row">
                         <div class="form-group">
                             <label for="gasto-cat">Categoría</label>
-                            <select id="gasto-cat" required>
-                            </select>
+                            <select id="gasto-cat" required></select>
                         </div>
                         <div class="form-group">
                             <label for="gasto-fecha">Fecha</label>
                             <input type="date" id="gasto-fecha" required>
                         </div>
+                    </div>
+
+                    <!-- Input para Comprobante Adjunto -->
+                    <div class="form-group">
+                        <label for="gasto-comprobante">Comprobante (Opcional)</label>
+                        <input type="file" id="gasto-comprobante" accept="image/*">
                     </div>
 
                     <div style="display: flex; gap: 10px; margin-top: 15px;">
@@ -70,22 +83,24 @@
                     </div>
                 </form>
 
+                <!-- Panel de Gráficos -->
                 <div class="charts-wrapper">
                     <div class="chart-card">
-                        <h4>Flujo Semanal ($)</h4>
+                        <h4>Ingresos vs Egresos (Global)</h4>
                         <div class="chart-container">
-                            <canvas id="chartSemanal"></canvas>
+                            <canvas id="chartBarras"></canvas>
                         </div>
                     </div>
                     <div class="chart-card">
-                        <h4>Ingresos vs Egresos (Mes)</h4>
+                        <h4>Distribución de Egresos</h4>
                         <div class="chart-container">
-                            <canvas id="chartMensual"></canvas>
+                            <canvas id="chartDona"></canvas>
                         </div>
                     </div>
                 </div>
             </section>
 
+            <!-- Resumen KPIs e Historial -->
             <section>
                 <div class="kpi-container">
                     <div class="kpi-card">
