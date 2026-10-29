@@ -37,8 +37,35 @@
     --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
+body {
+    font-family: var(--font-body);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 28px 18px;
+    transition: var(--transition);
+    line-height: 1.6;
+
+    /* FONDO: Degradado suave + Imagen local */
+    background-image: 
+        linear-gradient(
+            135deg, 
+            rgba(255, 253, 250, 0.88) 0%,   /* Cream/Beige claro */
+            rgba(247, 241, 229, 0.82) 45%,  /* Warm beige */
+            rgba(216, 112, 138, 0.30) 80%,  /* Rosa translúcido */
+            rgba(123, 164, 181, 0.25) 100%  /* Celeste translúcido */
+        ),
+        url('../img/imagen.jpg'); 
+
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+}
+
 body.dark-mode {
-    /* Paleta Oscura - Degradado Warm Slate */
     --bg-gradient: linear-gradient(135deg, #141210 0%, #1f1b18 50%, #161412 100%);
     --card-bg: rgba(33, 30, 27, 0.88);
     --card-border: rgba(51, 47, 42, 0.8);
@@ -54,26 +81,16 @@ body.dark-mode {
     
     --shadow-soft: 0 12px 35px -10px rgba(0, 0, 0, 0.45);
     --shadow-hover: 0 20px 40px -12px rgba(0, 0, 0, 0.6);
-}
 
-* {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    font-family: var(--font-body);
-    background: var(--bg-gradient);
-    background-attachment: fixed;
-    color: var(--text-primary);
-    min-height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 28px 18px;
-    transition: var(--transition);
-    line-height: 1.6;
+    /* Adaptación del fondo con degradado oscuro sobre la misma imagen */
+    background-image: 
+        linear-gradient(
+            135deg, 
+            rgba(20, 18, 16, 0.92) 0%, 
+            rgba(31, 27, 24, 0.88) 50%, 
+            rgba(22, 20, 18, 0.92) 100%
+        ),
+        url('../img/imagen.jpg');
 }
 
 /* --- BOTÓN DE TEMA OSCURO CON HOVER DIVERTIDO --- */
